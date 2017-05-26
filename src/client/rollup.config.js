@@ -1,6 +1,7 @@
 import typescript from 'rollup-plugin-typescript';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import globals from 'rollup-plugin-node-globals';
 
 export default {
 	format: 'iife',
@@ -16,7 +17,8 @@ export default {
 		}),
 		typescript({
 			typescript: require('typescript')
-		})
+		}),
+		globals()
 	],
 	dest: "../../public/js/bundle.js",
 	sourceMap: true
