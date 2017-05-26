@@ -1,4 +1,4 @@
 
-export default function() {
-	console.log("Hello, Rollup!");
+export function test() {
+	return "Hello, Rollup!";
 }
