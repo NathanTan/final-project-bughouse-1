@@ -5,6 +5,5 @@
     "sourceMap": true,
     "outDir": "../../build",
     "strict": true
-  },
-  "compileOnSave": true
+  }
 }

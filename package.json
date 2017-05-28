@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prestart": "./node_modules/.bin/tsc -p src/server && (cd src/client && rollup -c)",
-    "start": "node ./build/index.js"
+    "watch": "tsc -w -p src/client/",
+    "start": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -27,16 +27,13 @@
     "@types/node": "^7.0.22",
     "@types/react": "^15.0.25",
     "@types/react-dom": "^15.5.0",
-    "rollup": "^0.41.6",
-    "rollup-plugin-commonjs": "^8.0.2",
-    "rollup-plugin-node-globals": "^1.1.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-typescript": "^0.8.1",
+    "ts-node": "^3.0.4",
     "typescript": "^2.3.3"
   },
   "dependencies": {
     "express": "^4.15.3",
     "express-handlebars": "^3.0.0",
+    "nodemon": "^1.11.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
   }
