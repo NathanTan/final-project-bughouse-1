@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc -w -p src/client/",
-    "start": "tsc -p src/client/ && ts-node src/server/index.ts"
+    "install": "tsc -p src/client/",
+    "start": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -21,17 +22,6 @@
     "url": "https://github.com/OSU-CS290-Sp2017/final-project-bughouse-1/issues"
   },
   "homepage": "https://github.com/OSU-CS290-Sp2017/final-project-bughouse-1#readme",
-  "devDependencies": {
-    "@types/express": "^4.0.35",
-    "@types/express-handlebars": "0.0.29",
-    "@types/node": "^7.0.22",
-    "@types/react": "^15.0.25",
-    "@types/react-dom": "^15.5.0",
-    "@types/socket.io": "^1.4.29",
-    "@types/socket.io-client": "^1.4.29",
-    "ts-node": "^3.0.4",
-    "typescript": "^2.3.3"
-  },
   "dependencies": {
     "chess.js": "^0.10.2",
     "express": "^4.15.3",
@@ -41,6 +31,15 @@
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "socket.io": "^2.0.1",
-    "socket.io-client": "^2.0.1"
+    "socket.io-client": "^2.0.1",
+    "ts-node": "^3.0.4",
+    "typescript": "^2.3.3",
+    "@types/express": "^4.0.35",
+    "@types/express-handlebars": "0.0.29",
+    "@types/node": "^7.0.22",
+    "@types/react": "^15.0.25",
+    "@types/react-dom": "^15.5.0",
+    "@types/socket.io": "^1.4.29",
+    "@types/socket.io-client": "^1.4.29"
   }
 }
