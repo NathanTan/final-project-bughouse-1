@@ -58,4 +58,5 @@ app.get('/session/:name', function(req, res) {
 	res.render('session', { name });
 });
 
-server.listen(3000);
+const port = process.env.PORT || 3000;
+server.listen(port);
