@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc -w -p src/client/",
     "install": "npm run build",
-    "build": "tsc -p src/client/",
+    "build": "./node_modules/.bin/tsc -p src/client/",
     "start": "nodemon"
   },
   "repository": {
