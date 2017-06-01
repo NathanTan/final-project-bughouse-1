@@ -22,7 +22,7 @@ app.use('/src', express.static('./src'));
 app.use('/session/img', express.static('./public/img'));
 
 app.get('/', function(req, res) {
-	res.render('home');
+	res.render('home', { sessions });
 });
 
 interface Session {
