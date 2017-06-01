@@ -33,7 +33,7 @@ class App {
 		this.board.position(fen);
 	};
 
-	gameChanged = (move: Move) => {
+	gameChanged = (move: ChessJS.Move) => {
 		this.game.move(move);
 		this.board.move(move.from + "-" + move.to);
 	}

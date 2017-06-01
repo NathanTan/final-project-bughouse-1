@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as handlebars from 'express-handlebars';
 import * as path from 'path';
 import * as socket from 'socket.io';
-const { Chess } = require('chess.js');
+import { Chess } from 'chess.js';
 
 const app = express();
 const server = (http as any).Server(app);
@@ -39,14 +39,14 @@ app.get('/session/:name', function(req, res) {
 		const newSession = {
 			name,
 			namespace: io.of(name),
-			game: new (Chess as any)()
+			game: new Chess()
 		};
 		sessions[name] = newSession;
 		newSession.namespace.on('connection', function(sock) {
 			const pgn = newSession.game.fen();
 			console.log(pgn);
 			sock.emit('initGame', pgn);
-			sock.on('move', function(move: Move) {
+			sock.on('move', function(move: ChessJS.Move) {
 				console.log("I received a move", move);
 				newSession.game.move(move);
 				sock.broadcast.emit('gameChanged', move);
