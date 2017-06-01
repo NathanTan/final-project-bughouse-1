@@ -5,5 +5,9 @@
     "sourceMap": true,
     "outDir": "../../build",
     "strict": true
-  }
+  },
+  "include": [
+    "./*.ts",
+    "../*.ts"
+  ]
 }

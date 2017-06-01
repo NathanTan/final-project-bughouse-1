@@ -33,5 +33,11 @@ class App {
 	}
 }
 
-const elem = document.getElementById('root')!;
-const app = new App(elem);
+// const elem = document.getElementById('root')!;
+// const app = new App(elem);
+
+const config: ChessBoardJS.BoardConfig = {
+	draggable: true,
+	position: 'start'
+}
+const board = ChessBoard('root', config);

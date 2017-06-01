@@ -35,8 +35,10 @@
     "typescript": "^2.3.3"
   },
   "dependencies": {
+    "chess.js": "^0.10.2",
     "express": "^4.15.3",
     "express-handlebars": "^3.0.0",
+    "jquery": "^1.12.4",
     "nodemon": "^1.11.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
