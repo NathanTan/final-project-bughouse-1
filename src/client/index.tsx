@@ -16,7 +16,7 @@ class App {
 
 	constructor(private rootElem: HTMLElement) {
 		this.sock = io();
-		this.sock.on('eh', this.onEh);
+		this.sock.on('gameChanged', this.gameChanged);
 
 
 		const config: ChessBoardJS.BoardConfig = {
@@ -26,6 +26,11 @@ class App {
 		}
 		this.board = ChessBoard(rootElem, config);
 		this.game = new Chess();
+	}
+
+	gameChanged = (move: Move) => {
+		this.game.move(move);
+		this.board.move(move.from + "-" + move.to);
 	}
 
 	onDrop = (
@@ -45,21 +50,8 @@ class App {
 		if (!move) {
 			return 'snapback';
 		}
-	}
 
-	onEh = (data: any) => {
-		const newState = {...this.state};
-		newState.count++;
-		newState.data = data.foo;
-		this.state = newState;
-	};
-
-	render() {
-		ReactDOM.render(
-			<div>
-				<p>I have eh'd {this.state.count} times.</p>
-				<p>Here is my data: {this.state.data}</p>
-			</div>, this.rootElem);
+		this.sock.emit('move', move);
 	}
 }
 
