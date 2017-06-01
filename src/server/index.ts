@@ -15,6 +15,7 @@ app.set('view engine', 'handlebars');
 
 app.use('/', express.static('./public'));
 app.use('/lib', express.static('./node_modules'));
+app.use('/src', express.static('./src'));
 
 app.get('/', function(req, res) {
 	res.render('home');

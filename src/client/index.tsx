@@ -6,6 +6,9 @@ interface State {
 
 class App {
 	sock: SocketIOClient.Socket;
+	board: ChessBoardInstance;
+	game: Chess;
+
 	state = {
 		count: 0,
 		data: ''
@@ -14,6 +17,34 @@ class App {
 	constructor(private rootElem: HTMLElement) {
 		this.sock = io();
 		this.sock.on('eh', this.onEh);
+
+
+		const config: ChessBoardJS.BoardConfig = {
+			draggable: true,
+			onDrop: this.onDrop.bind(this),
+			position: 'start'
+		}
+		this.board = ChessBoard(rootElem, config);
+		this.game = new Chess();
+	}
+
+	onDrop = (
+		source: string,
+		target: string,
+		piece: string,
+		newPos: object,
+		oldPos: object,
+		orientation: string) => {
+
+		const move = this.game.move({
+			from: source,
+			to: target,
+			promotion: 'q'
+		});
+
+		if (!move) {
+			return 'snapback';
+		}
 	}
 
 	onEh = (data: any) => {
@@ -21,7 +52,6 @@ class App {
 		newState.count++;
 		newState.data = data.foo;
 		this.state = newState;
-		this.render();
 	};
 
 	render() {
@@ -33,11 +63,5 @@ class App {
 	}
 }
 
-// const elem = document.getElementById('root')!;
-// const app = new App(elem);
-
-const config: ChessBoardJS.BoardConfig = {
-	draggable: true,
-	position: 'start'
-}
-const board = ChessBoard('root', config);
+const elem = document.getElementById('root')!;
+const app = new App(elem);
