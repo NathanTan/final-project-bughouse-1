@@ -130,5 +130,5 @@ declare class Chess {
 declare module 'chess.js' {
 var Chess: Chess;
 
-export = Chess;
+export = { Chess };
 }

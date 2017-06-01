@@ -14,19 +14,24 @@ class App {
 		data: ''
 	};
 
-	constructor(private rootElem: HTMLElement) {
-		this.sock = io();
+	constructor(private rootElem: HTMLElement, name: string) {
+		this.sock = io(name);
 		this.sock.on('gameChanged', this.gameChanged);
-
+		this.sock.on('initGame', this.initGame);
 
 		const config: ChessBoardJS.BoardConfig = {
 			draggable: true,
-			onDrop: this.onDrop.bind(this),
-			position: 'start'
+			onDrop: this.onDrop.bind(this)
 		}
 		this.board = ChessBoard(rootElem, config);
 		this.game = new Chess();
 	}
+
+	initGame = (fen: string) => {
+		console.log(fen);
+		this.game.load(fen);
+		this.board.position(fen);
+	};
 
 	gameChanged = (move: Move) => {
 		this.game.move(move);
@@ -51,9 +56,12 @@ class App {
 			return 'snapback';
 		}
 
+		console.log("I'm sending a move", move);
 		this.sock.emit('move', move);
 	}
 }
 
-const elem = document.getElementById('root')!;
-const app = new App(elem);
+function initSession(name: string) {
+	const elem = document.getElementById('root')!;
+	const app = new App(elem, name);
+}
