@@ -43,9 +43,9 @@ app.get('/session/:name', function(req, res) {
 		};
 		sessions[name] = newSession;
 		newSession.namespace.on('connection', function(sock) {
-			const pgn = newSession.game.fen();
-			console.log(pgn);
-			sock.emit('initGame', pgn);
+			const fen = newSession.game.fen();
+			console.log(fen);
+			sock.emit('initGame', fen);
 			sock.on('move', function(move: ChessJS.Move) {
 				console.log("I received a move", move);
 				newSession.game.move(move);
