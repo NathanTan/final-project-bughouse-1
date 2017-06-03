@@ -6,7 +6,8 @@ interface State {
 
 class App {
 	sock: SocketIOClient.Socket;
-	board: ChessBoardInstance;
+	board1: ChessBoardInstance;
+	board2: ChessBoardInstance;
 	game: Chess;
 
 	state = {
@@ -19,23 +20,34 @@ class App {
 		this.sock.on('gameChanged', this.gameChanged);
 		this.sock.on('initGame', this.initGame);
 
-		const config: ChessBoardJS.BoardConfig = {
+		const board1Config: ChessBoardJS.BoardConfig = {
+			showNotation: false,
 			draggable: true,
 			onDrop: this.onDrop.bind(this)
 		}
-		this.board = ChessBoard(rootElem, config);
+		const board2Config: ChessBoardJS.BoardConfig = {
+			showNotation: false,
+			draggable: false,
+			orientation: 'black'
+		}
+		const board1 = document.getElementById('board1');
+		const board2 = document.getElementById('board2');
+		this.board1 = ChessBoard(board1, board1Config);
+		this.board2 = ChessBoard(board2, board2Config);
 		this.game = new Chess();
 	}
 
 	initGame = (fen: string) => {
 		console.log(fen);
 		this.game.load(fen);
-		this.board.position(fen);
+		this.board1.position(fen);
+		this.board2.position(fen);
 	};
 
 	gameChanged = (move: ChessJS.Move) => {
 		this.game.move(move);
-		this.board.move(move.from + "-" + move.to);
+		this.board1.move(move.from + "-" + move.to);
+		this.board2.move(move.from + "-" + move.to);
 	}
 
 	onDrop = (
@@ -62,6 +74,7 @@ class App {
 }
 
 function initSession(name: string) {
+	console.log("Creating new session: " + name);
 	const elem = document.getElementById('root')!;
 	const app = new App(elem, name);
 }
