@@ -46,10 +46,10 @@ class App {
 		this.board2.position(fen);
 	};
 
-	gameChanged = (move: ChessJS.Move) => {
-		this.game.move(move);
-		this.board1.move(move.from + "-" + move.to);
-		this.board2.move(move.from + "-" + move.to);
+	gameChanged = (fen: string) => {
+		this.game.load(fen);
+		this.board1.position(fen);
+		this.board2.position(fen);
 	}
 
 	// do not pick up pieces if the game is over

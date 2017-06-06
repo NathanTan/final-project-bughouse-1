@@ -53,7 +53,9 @@ app.get('/session/:name', function(req, res) {
 			sock.on('move', function(move: ChessJS.Move) {
 				console.log("I received a move", move);
 				newSession.game.move(move);
-				sock.broadcast.emit('gameChanged', move);
+				const fen: string = newSession.game.fen();
+				console.log("Sending fen", fen);
+				sock.broadcast.emit('gameChanged', fen);
 			});
 
 		});
