@@ -5,6 +5,7 @@ import * as http from 'http';
 import * as handlebars from 'express-handlebars';
 import * as path from 'path';
 import * as socket from 'socket.io';
+import * as bodyParser from 'body-parser';
 import { Chess } from 'chess.js';
 
 const app = express();
@@ -15,6 +16,9 @@ app.engine('handlebars', handlebars({
 	defaultLayout: 'main',
 }));
 app.set('view engine', 'handlebars');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.use('/', express.static('./public'));
 app.use('/lib', express.static('./node_modules'));
@@ -56,6 +60,11 @@ app.get('/session/:name', function(req, res) {
 	}
 
 	res.render('session', { name });
+});
+
+app.post('/session', function(req, res) {
+	const newSessionName: string = req.body.newSessionName;
+	if (newSessionName)	res.redirect('/session/' + newSessionName);
 });
 
 const port = process.env.PORT || 3000;

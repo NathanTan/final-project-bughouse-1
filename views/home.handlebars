@@ -1,6 +1,6 @@
-<h1>Bughouse Chess Zone</h1>
+<h1>Bughouse!</h1>
 <div>
-	<h2>Join a Game</h2>
+	<h2>Join a current game</h2>
 	<ul>
 		{{#each sessions }}
 			<li>
@@ -8,6 +8,13 @@
 					{{ name }}
 				</a>
 			</li>
+		{{else}}
+			<p>No games created</p>
 		{{/each}}
 	</ul>
+	<h2>Start a new game</h2>
+	<form action="/session" method="POST">
+		<input type="text" name="newSessionName" placeholder="Session name" required>
+		<input type="submit" value="Start">
+	</form>
 </div>
