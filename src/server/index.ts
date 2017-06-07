@@ -57,7 +57,9 @@ app.get('/session/:name', function(req, res) {
 				console.log("Sending fen", fen);
 				sock.broadcast.emit('gameChanged', fen);
 			});
-
+			sock.on('playerNameChanged', function(id: string, name: string) {
+				sock.broadcast.emit('playerNameChanged', id, name);
+			});
 		});
 	}
 

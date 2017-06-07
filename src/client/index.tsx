@@ -19,6 +19,7 @@ class App {
 		this.sock = io(name);
 		this.sock.on('gameChanged', this.gameChanged);
 		this.sock.on('initGame', this.initGame);
+		this.sock.on('playerNameChanged', this.playerNameChanged);
 
 		const board1Config: ChessBoardJS.BoardConfig = {
 			showNotation: false,
@@ -37,6 +38,27 @@ class App {
 		this.board1 = ChessBoard(board1, board1Config);
 		this.board2 = ChessBoard(board2, board2Config);
 		this.game = new Chess();
+
+		const playerNameInputs = document.getElementsByName('player-name');
+		for (var i = 0; i < playerNameInputs.length; i++) {
+			playerNameInputs[i].addEventListener('change', this.playerNameChange);
+		}
+	}
+
+	playerNameChange = (e: Event) => {
+		const input = e.target as HTMLInputElement;
+		console.log(input.value);
+		const id = input.id;
+		const newPlayerName = input.value;
+		this.sock.emit('playerNameChanged', id, newPlayerName);
+	}
+
+	playerNameChanged = (id: string, name: string) => {
+		console.log(name);
+		const input: HTMLInputElement = document.getElementById(id) as HTMLInputElement;
+		if (input) {
+			input.value = name;
+		}
 	}
 
 	initGame = (fen: string) => {
