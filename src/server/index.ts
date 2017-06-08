@@ -61,7 +61,8 @@ app.get('/session/:name', function(req, res) {
 		};
 		sessions[name] = gameSession;
 		gameSession.namespace.on('connection', function(sock) {
-			const id = sock.id;
+			const sockId = sock.id;
+			let idPlayer: keyof Players;
 			const fen = gameSession.game.fen();
 			const players = gameSession.players;
 			sock.emit('initGame', fen, players);
@@ -77,11 +78,28 @@ app.get('/session/:name', function(req, res) {
 				}
 			});
 			sock.on('playerNameChanged', function(playerId: keyof Players, name: string) {
-				gameSession.players[playerId] = {
-					sockId: id,
-					name: name
-				}
+				idPlayer = playerId;
+				const player = gameSession.players[playerId];
+				
+				// Allow name change if player is null
+				if (!player) {
+					gameSession.players[playerId] = {
+						sockId: sockId,
+						name: name
+					}
+				} 
+				// Allow player to change their own name
+				else if (player.sockId === sockId) {
+					player.name = name;
+				} else return;
+
 				sock.broadcast.emit('playerNameChanged', playerId, name);
+			});
+			sock.on('disconnect', function() {
+				if (idPlayer) {
+					gameSession.players[idPlayer] = undefined;
+					sock.broadcast.emit('playerNameChanged', idPlayer, "");
+				}
 			});
 		});
 	}
