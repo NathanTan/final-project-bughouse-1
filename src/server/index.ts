@@ -65,31 +65,29 @@ app.get('/session/:name', function(req, res) {
 		sessions[name] = gameSession;
 		gameSession.namespace.on('connection', function(sock) {
             const sockId = sock.id;
-            const fen = gameSession.game1.fen();
+            const fen1 = gameSession.game1.fen();
             const fen2 = gameSession.game2.fen();
             const players = gameSession.players;
 			let idPlayer: keyof Players;
-            console.log("Game 1: " + fen);
+			console.log("New connection:", sockId);
+            console.log("Game 1: " + fen1);
 			console.log("Game 2: " + fen2);
-			sock.emit('initGame', {fen, fen2}, players);
+			sock.emit('initGame', {fen1, fen2}, players);
 			sock.on('move', function(moveData: MoveData) {
-				console.log("I received a move", moveData.move
-				            + " from board " + moveData.board);
-				if(moveData.board === "1"){ //For game 1
+				console.log("I received a move", moveData.move.san, "from board", moveData.board);
+				let fen: string;
+				if (moveData.board === "1") { // board1
 					gameSession.game1.move(moveData.move);
-					const fen: string = gameSession.game1.fen();
-					console.log("Sending fen", fen);
-					sock.broadcast.emit('gameChanged', {board: moveData.board, move: fen});
-				}
-				else if(moveData.board === "2"){ //For game 2
+					fen = gameSession.game1.fen();
+				} else if (moveData.board === "2") { // board2
 					gameSession.game2.move(moveData.move);
-					const fen: string = gameSession.game2.fen();
-					console.log("Sending fen", fen);
-				   sock.broadcast.emit('gameChanged', {board: moveData.board, move: fen2});
-                }
+					fen = gameSession.game2.fen();
+                } else return;
+
+				console.log("Sending fen:", fen);
+				sock.broadcast.emit('gameChanged', moveData.board, fen);
             });
 			sock.on('playerNameChanged', function(playerId: keyof Players, name: string) {
-				console.log('Player name changed to', playerId, name);
 				idPlayer = playerId;
 				const player = gameSession.players[playerId];
 
@@ -105,9 +103,11 @@ app.get('/session/:name', function(req, res) {
 					player.name = name;
 				} else return;
 
+				console.log(playerId, 'player name changed to', name);
 				sock.broadcast.emit('playerNameChanged', playerId, name);
 			});
 			sock.on('disconnect', function() {
+				console.log("Disconnect:", sockId);
 				if (idPlayer) {
 					gameSession.players[idPlayer] = undefined;
 					sock.broadcast.emit('playerNameChanged', idPlayer, "");

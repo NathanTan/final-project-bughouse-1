@@ -19,6 +19,7 @@ interface Players {
 
 class App {
 	sock: SocketIOClient.Socket;
+	thisBoard: string;
 	board1: ChessBoardInstance;
 	board2: ChessBoardInstance;
 	playerInputs: {
@@ -27,11 +28,12 @@ class App {
 		board2White: HTMLInputElement,
 		board2Black: HTMLInputElement
 	};
-	game: {boardname: string, state: Chess};
+	game1: {boardname: string, state: Chess};
 	game2: {boardname: string, state: Chess};
 
 	constructor(private rootElem: HTMLElement, name: string) {
 		this.sock = io(name);
+		this.thisBoard = "2";
 		this.sock.on('gameChanged', this.gameChanged);
         this.sock.on('initGame', this.initGame);
         this.sock.on('playerNameChanged', this.playerNameChanged);
@@ -55,7 +57,7 @@ class App {
 		const board2 = document.getElementById('board2');
 		this.board1 = ChessBoard(board1, board1Config);
 		this.board2 = ChessBoard(board2, board2Config);
-		this.game = {
+		this.game1 = {
             state: new Chess(),
             boardname: "1"
 		};
@@ -68,16 +70,16 @@ class App {
 		for (var i = 0; i < playerNameInputs.length; i++) {
 			let input = playerNameInputs[i];
 			(this.playerInputs as any)[input.id] = input;
-			input.addEventListener('change', this.playerNameChange);
+			input.addEventListener('change', this.onPlayerNameChange);
 		}
 	}
 
-	initGame = ( boards:{ fen: string , fen2: string}, players: Players) => {
-		console.log("fen: " + boards.fen);
+	initGame = (boards: {fen1: string , fen2: string}, players: Players) => {
+		console.log("fen1: " + boards.fen1);
 		console.log("fen2: " + boards.fen2);
-		this.game.state.load(boards.fen);
+		this.game1.state.load(boards.fen1);
 		this.game2.state.load(boards.fen2);
-		this.board1.position(boards.fen);
+		this.board1.position(boards.fen1);
 		this.board2.position(boards.fen2);
 
 		if (players.board1White)
@@ -90,7 +92,7 @@ class App {
 				this.playerInputs.board2Black.value = players.board2Black.name;
 	};
 
-	playerNameChange = (e: Event) => {
+	onPlayerNameChange = (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		const id = input.id;
 		const newPlayerName = input.value;
@@ -105,16 +107,14 @@ class App {
         }
     };
 
-	gameChanged = (state:{board: string, fen: string}) => {
-		console.log("Game changed on bard " + state.board)
-		if(state.board === "1"){
-			this.game.state.load(state.fen);
-			this.board1.position(state.fen);
-			this.board1.position(state.fen);
-		}
-		else if(state.board === "2"){
-			this.game.state.load(state.fen);
-			this.board2.position(state.fen);
+	gameChanged = (boardname: string, fen: string) => {
+		console.log("Game changed on board", boardname);
+		if (boardname === "1") {
+			this.game1.state.load(fen);
+			this.board1.position(fen);
+		} else if (boardname === "2") {
+			this.game2.state.load(fen);
+			this.board2.position(fen);
 		}
 	}
 
@@ -125,10 +125,18 @@ class App {
 		piece: string,
 		position: string,
 		orientation: string) => {
-		if (this.game.state.game_over() ||
-			(this.game.state.turn() === 'w' && piece.search(/^b/) !== -1) ||
-			(this.game.state.turn() === 'b' && piece.search(/^w/) !== -1)) {
-			return false;
+		
+		if (this.game1.state.game_over() || this.game2.state.game_over()) return false;
+		if (this.thisBoard === "1") {
+			if ((this.game1.state.turn() === 'w' && piece.search(/^b/) !== -1) ||
+				(this.game1.state.turn() === 'b' && piece.search(/^w/) !== -1)) {
+				return false;
+			}
+		} else {
+			if ((this.game2.state.turn() === 'w' && piece.search(/^b/) !== -1) ||
+				(this.game2.state.turn() === 'b' && piece.search(/^w/) !== -1)) {
+				return false;
+			}
 		}
 	}
 
@@ -140,7 +148,7 @@ class App {
 		oldPos: object,
 		orientation: string) => {
 
-		const move = this.game.state.move({
+		const move = this.game1.state.move({
 			from: source,
 			to: target,
 			promotion: 'q' // TODO: allow user to pick promotion piece
@@ -150,9 +158,8 @@ class App {
 		if (!move) return 'snapback';
 
 		console.log("I'm sending a move", move);
-		this.sock.emit('move',
-		{
-			board: this.game.boardname,
+		this.sock.emit('move', {
+			board: this.thisBoard,
 			move: move
 		});
 	}
@@ -160,7 +167,10 @@ class App {
 	// update the board position after the piece snap
 	// for castling, en passant, pawn promotion
 	onSnapEnd = () => {
-		this.board1.position(this.game.state.fen());
+		if (this.thisBoard === "1")
+			this.board1.position(this.game1.state.fen());
+		else
+			this.board2.position(this.game2.state.fen());
 	}
 }
 
