@@ -19,7 +19,10 @@ interface Players {
 
 class App {
 	sock: SocketIOClient.Socket;
-	thisBoard: string;
+	me: {
+		boardName: string,
+		color: string
+	}
 	board1: ChessBoardInstance;
 	board2: ChessBoardInstance;
 	playerInputs: {
@@ -28,12 +31,11 @@ class App {
 		board2White: HTMLInputElement,
 		board2Black: HTMLInputElement
 	};
-	game1: {boardname: string, state: Chess};
-	game2: {boardname: string, state: Chess};
+	game1: {boardName: string, state: Chess};
+	game2: {boardName: string, state: Chess};
 
 	constructor(private rootElem: HTMLElement, name: string) {
 		this.sock = io(name);
-		this.thisBoard = "2";
 		this.sock.on('gameChanged', this.gameChanged);
         this.sock.on('initGame', this.initGame);
         this.sock.on('playerNameChanged', this.playerNameChanged);
@@ -47,23 +49,23 @@ class App {
 		}
 		const board2Config: ChessBoardJS.BoardConfig = {
 			showNotation: false,
-			draggable: false,
+			draggable: true,
 			onDrop: this.onDrop,
 			onDragStart: this.onDragStart,
 			onSnapEnd: this.onSnapEnd,
 			orientation: 'black'
 		}
-		const board1 = document.getElementById('board1');
-		const board2 = document.getElementById('board2');
-		this.board1 = ChessBoard(board1, board1Config);
-		this.board2 = ChessBoard(board2, board2Config);
+		const board1El = document.getElementById('board1');
+		const board2El = document.getElementById('board2');
+		this.board1 = ChessBoard(board1El, board1Config);
+		this.board2 = ChessBoard(board2El, board2Config);
 		this.game1 = {
             state: new Chess(),
-            boardname: "1"
+            boardName: "1"
 		};
 		this.game2 = {
             state: new Chess(),
-		    boardname: "2"
+		    boardName: "2"
         };
 		this.playerInputs = {} as any;
 		const playerNameInputs = document.getElementsByName('player-name');
@@ -90,14 +92,32 @@ class App {
 				this.playerInputs.board2White.value = players.board2White.name;
 		if (players.board2Black)
 				this.playerInputs.board2Black.value = players.board2Black.name;
-	};
+	}
 
 	onPlayerNameChange = (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		const id = input.id;
 		const newPlayerName = input.value;
-		this.sock.emit('playerNameChanged', id, newPlayerName);
-    };
+		this.sock.emit('playerNameChanged', id, newPlayerName, this.nameChangeConfirmed);
+    }
+
+	nameChangeConfirmed = (playerId: string) => {
+		// Set player's board position
+		switch (playerId) {
+			case "board1White":
+				this.me = {boardName: "1", color: "w"};
+				break;
+			case "board1Black":
+				this.me = {boardName: "1", color: "b"};
+				break;
+			case "board2White":
+				this.me = {boardName: "2", color: "w"};
+				break;
+			case "board2Black":
+				this.me = {boardName: "2", color: "b"};
+				break;
+		}
+	}
 
 	playerNameChanged = (id: string, name: string) => {
 		console.log(name);
@@ -105,7 +125,7 @@ class App {
 		if (input) {
 			input.value = name;
         }
-    };
+    }
 
 	gameChanged = (boardname: string, fen: string) => {
 		console.log("Game changed on board", boardname);
@@ -126,18 +146,17 @@ class App {
 		position: string,
 		orientation: string) => {
 		
+		// prevent drag if either game is over
 		if (this.game1.state.game_over() || this.game2.state.game_over()) return false;
-		if (this.thisBoard === "1") {
-			if ((this.game1.state.turn() === 'w' && piece.search(/^b/) !== -1) ||
-				(this.game1.state.turn() === 'b' && piece.search(/^w/) !== -1)) {
-				return false;
-			}
-		} else {
-			if ((this.game2.state.turn() === 'w' && piece.search(/^b/) !== -1) ||
-				(this.game2.state.turn() === 'b' && piece.search(/^w/) !== -1)) {
-				return false;
-			}
-		}
+		// prevent drag if it's on the wrong board
+		if (this.me.boardName === "1" && orientation === "black") return false;
+		if (this.me.boardName === "2" && orientation === "white") return false;
+		// prevent move if it's the wrong color
+		if (this.me.color === "w" && piece.search(/^b/) !== -1) return false;
+		if (this.me.color === "b" && piece.search(/^w/) !== -1) return false;
+		// prevent move if it's not your turn
+		if (this.me.boardName === "1" && this.game1.state.turn() !== this.me.color) return false;
+		if (this.me.boardName === "2" && this.game2.state.turn() !== this.me.color) return false;
 	}
 
 	onDrop = (
@@ -148,7 +167,8 @@ class App {
 		oldPos: object,
 		orientation: string) => {
 
-		const move = this.game1.state.move({
+		const gameEngine = (this.me.boardName === "1") ? this.game1.state : this.game2.state;
+		const move = gameEngine.move({
 			from: source,
 			to: target,
 			promotion: 'q' // TODO: allow user to pick promotion piece
@@ -159,7 +179,7 @@ class App {
 
 		console.log("I'm sending a move", move);
 		this.sock.emit('move', {
-			board: this.thisBoard,
+			board: this.me.boardName,
 			move: move
 		});
 	}
@@ -167,7 +187,7 @@ class App {
 	// update the board position after the piece snap
 	// for castling, en passant, pawn promotion
 	onSnapEnd = () => {
-		if (this.thisBoard === "1")
+		if (this.me.boardName === "1")
 			this.board1.position(this.game1.state.fen());
 		else
 			this.board2.position(this.game2.state.fen());

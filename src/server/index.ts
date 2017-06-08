@@ -68,7 +68,7 @@ app.get('/session/:name', function(req, res) {
             const fen1 = gameSession.game1.fen();
             const fen2 = gameSession.game2.fen();
             const players = gameSession.players;
-			let idPlayer: keyof Players;
+			let playerKey: keyof Players;
 			console.log("New connection:", sockId);
             console.log("Game 1: " + fen1);
 			console.log("Game 2: " + fen2);
@@ -87,8 +87,8 @@ app.get('/session/:name', function(req, res) {
 				console.log("Sending fen:", fen);
 				sock.broadcast.emit('gameChanged', moveData.board, fen);
             });
-			sock.on('playerNameChanged', function(playerId: keyof Players, name: string) {
-				idPlayer = playerId;
+			sock.on('playerNameChanged', function(playerId: keyof Players, name: string, fn: Function) {
+				playerKey = playerId;
 				const player = gameSession.players[playerId];
 
 				// Allow name change if player is null
@@ -104,13 +104,14 @@ app.get('/session/:name', function(req, res) {
 				} else return;
 
 				console.log(playerId, 'player name changed to', name);
+				fn(playerKey);
 				sock.broadcast.emit('playerNameChanged', playerId, name);
 			});
 			sock.on('disconnect', function() {
 				console.log("Disconnect:", sockId);
-				if (idPlayer) {
-					gameSession.players[idPlayer] = undefined;
-					sock.broadcast.emit('playerNameChanged', idPlayer, "");
+				if (playerKey) {
+					gameSession.players[playerKey] = undefined;
+					sock.broadcast.emit('playerNameChanged', playerKey, "");
 				}
 			});
 		});
