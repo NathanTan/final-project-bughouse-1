@@ -10,3 +10,8 @@ var myPiece = {
 	type: "queen",
 	promoted: true
 };
+
+export interface MoveData {
+	board: string;
+	move: ChessJS.Move;
+}
