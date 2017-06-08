@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as socket from 'socket.io';
 import * as bodyParser from 'body-parser';
 import { Chess } from 'chess.js';
+import { MoveData } from '../models'
 
 const app = express();
 const server = (http as any).Server(app);
@@ -32,7 +33,8 @@ app.get('/', function(req, res) {
 interface Session {
 	name: string;
 	namespace: SocketIO.Namespace;
-	game: Chess;
+	game1: Chess;
+	game2: Chess;
 }
 
 const sessions: { [name: string]: Session } = {};
@@ -43,23 +45,34 @@ app.get('/session/:name', function(req, res) {
 		const newSession = {
 			name,
 			namespace: io.of(name),
-			game: new Chess()
+			game1: new Chess(),
+			game2: new Chess()
 		};
 		sessions[name] = newSession;
 		newSession.namespace.on('connection', function(sock) {
-			const fen = newSession.game.fen();
-			console.log(fen);
-			sock.emit('initGame', fen);
-			sock.on('move', function(move: ChessJS.Move) {
-				console.log("I received a move", move);
-				newSession.game.move(move);
-				const fen: string = newSession.game.fen();
-				console.log("Sending fen", fen);
-				sock.broadcast.emit('gameChanged', fen);
-			});
-			sock.on('playerNameChanged', function(id: string, name: string) {
-				sock.broadcast.emit('playerNameChanged', id, name);
-			});
+			const fen = newSession.game1.fen();
+			const fen2 = newSession.game2.fen();
+			console.log("Game 1: " + fen);
+			console.log("Game 2: " + fen2);
+			sock.emit('initGame', {fen, fen2});
+			// sock.emit('initGame', fen2);
+			sock.on('move', function(moveData: MoveData) {
+				console.log("I received a move", moveData.move
+				            + " from board " + moveData.board);
+				if(moveData.board === "1"){ //For game 1
+					newSession.game1.move(moveData.move);
+					const fen: string = newSession.game1.fen();
+					console.log("Sending fen", fen);
+					sock.broadcast.emit('gameChanged', {board: moveData.board, move: fen});
+				}
+				else if(moveData.board === "2"){ //For game 2
+					newSession.game2.move(moveData.move);
+					const fen: string = newSession.game2.fen();
+					console.log("Sending fen", fen);
+				   sock.broadcast.emit('gameChanged', {board: moveData.board, move: fen2});
+				}	
+		});
+
 		});
 	}
 
