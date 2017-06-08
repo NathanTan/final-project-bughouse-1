@@ -29,8 +29,21 @@ app.get('/', function(req, res) {
 	res.render('home', { sessions });
 });
 
+interface Player {
+	sockId: string,
+	name: string
+}
+
+interface Players {
+	board1White?: Player,
+	board1Black?: Player,
+	board2White?: Player,
+	board2Black?: Player
+}
+
 interface Session {
 	name: string;
+	players: Players;
 	namespace: SocketIO.Namespace;
 	game: Chess;
 }
@@ -40,25 +53,35 @@ const sessions: { [name: string]: Session } = {};
 app.get('/session/:name', function(req, res) {
 	const name: string = req.params.name;
 	if (!sessions[name]) {
-		const newSession = {
+		const gameSession: Session = {
 			name,
+			players: {},
 			namespace: io.of(name),
 			game: new Chess()
 		};
-		sessions[name] = newSession;
-		newSession.namespace.on('connection', function(sock) {
-			const fen = newSession.game.fen();
-			console.log(fen);
-			sock.emit('initGame', fen);
+		sessions[name] = gameSession;
+		gameSession.namespace.on('connection', function(sock) {
+			const id = sock.id;
+			const fen = gameSession.game.fen();
+			const players = gameSession.players;
+			sock.emit('initGame', fen, players);
 			sock.on('move', function(move: ChessJS.Move) {
 				console.log("I received a move", move);
-				newSession.game.move(move);
-				const fen: string = newSession.game.fen();
+				gameSession.game.move(move);
+				const fen: string = gameSession.game.fen();
 				console.log("Sending fen", fen);
 				sock.broadcast.emit('gameChanged', fen);
+
+				for (let key in gameSession.players) {
+					console.log(gameSession.players[key as keyof Players]);
+				}
 			});
-			sock.on('playerNameChanged', function(id: string, name: string) {
-				sock.broadcast.emit('playerNameChanged', id, name);
+			sock.on('playerNameChanged', function(playerId: keyof Players, name: string) {
+				gameSession.players[playerId] = {
+					sockId: id,
+					name: name
+				}
+				sock.broadcast.emit('playerNameChanged', playerId, name);
 			});
 		});
 	}
