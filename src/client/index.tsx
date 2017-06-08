@@ -117,11 +117,16 @@ class App {
 				this.me = {boardName: "2", color: "b"};
 				break;
 		}
+
+		for (let key in this.playerInputs) {
+			let input = this.playerInputs[key as keyof Players];
+			input.disabled = (key !== playerId);
+		}
 	}
 
-	playerNameChanged = (id: string, name: string) => {
+	playerNameChanged = (playerId: keyof Players, name: string) => {
 		console.log(name);
-		const input: HTMLInputElement = document.getElementById(id) as HTMLInputElement;
+		const input = this.playerInputs[playerId];
 		if (input) {
 			input.value = name;
         }
