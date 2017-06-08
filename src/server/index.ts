@@ -64,11 +64,12 @@ app.get('/session/:name', function(req, res) {
 		};
 		sessions[name] = gameSession;
 		gameSession.namespace.on('connection', function(sock) {
-            const id = sock.id;
-			const fen = gameSession.game1.fen();
-			const fen2 = gameSession.game2.fen();
+            const sockId = sock.id;
+            const fen = gameSession.game1.fen();
+            const fen2 = gameSession.game2.fen();
             const players = gameSession.players;
-			console.log("Game 1: " + fen);
+			let idPlayer: keyof Players;
+            console.log("Game 1: " + fen);
 			console.log("Game 2: " + fen2);
 			sock.emit('initGame', {fen, fen2}, players);
 			sock.on('move', function(moveData: MoveData) {
@@ -87,15 +88,31 @@ app.get('/session/:name', function(req, res) {
 				   sock.broadcast.emit('gameChanged', {board: moveData.board, move: fen2});
                 }
             });
+			sock.on('playerNameChanged', function(playerId: keyof Players, name: string) {
+				console.log('Player name changed to', playerId, name);
+				idPlayer = playerId;
+				const player = gameSession.players[playerId];
 
-            sock.on('playerNameChanged', function(playerId: keyof Players, name: string) {
-				console.log('Received player name: ', playerId, name);
-                gameSession.players[playerId] = {
-                    sockId: id,
-                    name: name
-                }
-                sock.broadcast.emit('playerNameChanged', playerId, name);
-            });
+				// Allow name change if player is null
+				if (!player) {
+					gameSession.players[playerId] = {
+						sockId: sockId,
+						name: name
+					}
+				}
+				// Allow player to change their own name
+				else if (player.sockId === sockId) {
+					player.name = name;
+				} else return;
+
+				sock.broadcast.emit('playerNameChanged', playerId, name);
+			});
+			sock.on('disconnect', function() {
+				if (idPlayer) {
+					gameSession.players[idPlayer] = undefined;
+					sock.broadcast.emit('playerNameChanged', idPlayer, "");
+				}
+			});
 		});
 	}
 

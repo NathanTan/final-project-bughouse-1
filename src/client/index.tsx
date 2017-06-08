@@ -72,13 +72,6 @@ class App {
 		}
 	}
 
-	playerNameChange = (e: Event) => {
-		const input = e.target as HTMLInputElement;
-		const id = input.id;
-		const newPlayerName = input.value;
-		this.sock.emit('playerNameChanged', id, newPlayerName);
-    };
-
 	initGame = ( boards:{ fen: string , fen2: string}, players: Players) => {
 		console.log("fen: " + boards.fen);
 		console.log("fen2: " + boards.fen2);
@@ -96,6 +89,13 @@ class App {
 		if (players.board2Black)
 				this.playerInputs.board2Black.value = players.board2Black.name;
 	};
+
+	playerNameChange = (e: Event) => {
+		const input = e.target as HTMLInputElement;
+		const id = input.id;
+		const newPlayerName = input.value;
+		this.sock.emit('playerNameChanged', id, newPlayerName);
+    };
 
 	playerNameChanged = (id: string, name: string) => {
 		console.log(name);
