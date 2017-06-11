@@ -32,7 +32,8 @@ app.get('/', function(req, res) {
 
 interface Player {
 	sockId: string,
-	name: string
+	name: string,
+	hand: string[]
 }
 
 interface Players {
@@ -68,6 +69,9 @@ app.get('/session/:name', function(req, res) {
             const fen1 = gameSession.game1.fen();
             const fen2 = gameSession.game2.fen();
             const players = gameSession.players;
+			let hand="";
+
+			
 			let playerKey: keyof Players;
 			console.log("New connection:", sockId);
             console.log("Game 1: " + fen1);
@@ -75,14 +79,55 @@ app.get('/session/:name', function(req, res) {
 			sock.emit('initGame', {fen1, fen2}, players);
 			sock.on('move', function(moveData: MoveData) {
 				console.log("I received a move", moveData.move.san, "from board", moveData.board);
+				let pieceCaptured = moveData.move.captured;
+				
+				// console.log("All piece data: ")
+				// console.log("Piece captured: ");
+				// console.log(pieceCaptured ? "yes" : "no");
+				// console.log("Piece Color" + moveData.move.color)
+				// console.log("To: " + moveData.move.to)
+				// console.log("From: " + moveData.move.from)
+				// console.log("Flags: " + moveData.move.flags)
+				// console.log("San: " + moveData.move.san)
+				// console.log("Piece: " + moveData.move.piece)
+				// console.log("captured? " + moveData.move.captured)
+
+
 				let fen: string;
 				if (moveData.board === "1") { // board1
 					gameSession.game1.move(moveData.move);
 					fen = gameSession.game1.fen();
+
+					if(moveData.move.captured){ //If there was a piece captured					
+						if(moveData.move.color === "w"){
+							sessions[name].players.board2Black.hand.push(moveData.move.captured) // add the piece to the player's partner's hand
+						}
+						else if(moveData.move.color === "b"){
+							sessions[name].players.board2White.hand.push(moveData.move.captured) // add the piece to the player's partner's hand
+						}
+					}
+
 				} else if (moveData.board === "2") { // board2
 					gameSession.game2.move(moveData.move);
 					fen = gameSession.game2.fen();
+
+					if(moveData.move.captured){ //If there was a piece captured					
+						if(moveData.move.color === "w"){
+							sessions[name].players.board1Black.hand.push(moveData.move.captured)  // add the piece to the player's partner's hand
+						}
+						else if(moveData.move.color === "b"){
+							sessions[name].players.board1White.hand.push(moveData.move.captured) // add the piece to the player's partner's hand
+						}
+					}
+
                 } else return;
+
+
+				// console.log("Hands: ")
+				console.log(": " + JSON.stringify(sessions[name].players.board1White.hand))
+				console.log("PB1: " + JSON.stringify(sessions[name].players.board1Black.hand))
+				console.log("PW2: " + JSON.stringify(sessions[name].players.board2White.hand))
+				console.log("PB2: " + JSON.stringify(sessions[name].players.board2Black.hand))
 
 				console.log("Sending fen:", fen);
 				sock.broadcast.emit('gameChanged', moveData.board, fen);
@@ -95,7 +140,8 @@ app.get('/session/:name', function(req, res) {
 				if (!player) {
 					gameSession.players[playerId] = {
 						sockId: sockId,
-						name: name
+						name: name,
+						hand: new Array()
 					}
 				}
 				// Allow player to change their own name
