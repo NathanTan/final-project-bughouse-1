@@ -151,6 +151,8 @@ class App {
 		position: string,
 		orientation: string) => {
 		
+		// prevent drag if player has not joined the game
+		if (!this.me) return false;
 		// prevent drag if either game is over
 		if (this.game1.state.game_over() || this.game2.state.game_over()) return false;
 		// prevent drag if it's on the wrong board
