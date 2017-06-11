@@ -79,19 +79,6 @@ app.get('/session/:name', function(req, res) {
 			sock.emit('initGame', {fen1, fen2}, players);
 			sock.on('move', function(moveData: MoveData) {
 				console.log("I received a move", moveData.move.san, "from board", moveData.board);
-				let pieceCaptured = moveData.move.captured;
-				
-				// console.log("All piece data: ")
-				// console.log("Piece captured: ");
-				// console.log(pieceCaptured ? "yes" : "no");
-				// console.log("Piece Color" + moveData.move.color)
-				// console.log("To: " + moveData.move.to)
-				// console.log("From: " + moveData.move.from)
-				// console.log("Flags: " + moveData.move.flags)
-				// console.log("San: " + moveData.move.san)
-				// console.log("Piece: " + moveData.move.piece)
-				// console.log("captured? " + moveData.move.captured)
-
 
 				let fen: string;
 				if (moveData.board === "1") { // board1
@@ -123,8 +110,8 @@ app.get('/session/:name', function(req, res) {
                 } else return;
 
 
-				// console.log("Hands: ")
-				console.log(": " + JSON.stringify(sessions[name].players.board1White.hand))
+				console.log("Hands: ")
+				console.log("PW1 " + JSON.stringify(sessions[name].players.board1White.hand))
 				console.log("PB1: " + JSON.stringify(sessions[name].players.board1Black.hand))
 				console.log("PW2: " + JSON.stringify(sessions[name].players.board2White.hand))
 				console.log("PB2: " + JSON.stringify(sessions[name].players.board2Black.hand))
