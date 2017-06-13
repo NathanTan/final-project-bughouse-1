@@ -148,10 +148,18 @@ class App {
             this.game1.state.load(fen);
             this.board1.position(fen);
             this.updateTurnIndicator(boardname, this.game1.state.turn());
+            if (this.game1.state.in_checkmate()) {
+                const turn = this.game1.state.turn() === "w"
+                    ? "White"
+                    : "Black";
+                const playerName = `#board1${turn}`;
+                
+            }
         } else if (boardname === "2") {
             this.game2.state.load(fen);
             this.board2.position(fen);
             this.updateTurnIndicator(boardname, this.game2.state.turn());
+            if 
         }
     }
 

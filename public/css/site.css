@@ -166,6 +166,8 @@ li a:hover {
 #board1, #board2 {
     display: inline-block;
     width: 100%;
+    position: relative;
+
 }
 
 .player-name {
@@ -177,10 +179,6 @@ li a:hover {
 .panel {
     background-color: var(--color-ba1);
     border: 0px;
-}
-
-.hand{
-    border-bottom: grey solid 3px;
 }
 
 #socket-player {
@@ -200,4 +198,24 @@ li a:hover {
 
 .player-turn.active {
     background-color: green;
+}
+
+.modal {
+    display: flex;
+    position: absolute;
+    background-color: rgba(0, 0, 0, .8);
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: block;
+}
+
+.modal h3 {
+    color: white;
 }
