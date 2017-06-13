@@ -1,6 +1,7 @@
 
 :root {
     --color-input: #8c9497;
+    --color-disabled: #444;
     --color-two: #60412B;
     --color-five: #9AACB8;
     --color-three: #B37C57;
@@ -150,6 +151,10 @@ li a:hover {
     color: var(--color-input);
     background-color: var(--color-ba5);
     border: 2px solid var(--color-ba1);
+}
+
+input.form-control:disabled {
+    background-color: var(--color-disabled);
 }
 
 .btn {
