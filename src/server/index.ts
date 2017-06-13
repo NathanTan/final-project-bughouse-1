@@ -36,6 +36,13 @@ interface Player {
     hand: string[]
 }
 
+interface Hands{
+    board1WhiteHand: string[],
+    board1BlackHand: string[],
+    board2WhiteHand: string[],
+    board2BlackHand: string[]
+}
+
 interface Players {
     board1White?: Player,
     board1Black?: Player,
@@ -49,6 +56,7 @@ interface Session {
     namespace: SocketIO.Namespace;
     game1: Chess;
     game2: Chess;
+    hands: Hands;
 }
 
 const sessions: { [name: string]: Session } = {};
@@ -61,7 +69,13 @@ app.get('/session/:name', function(req, res) {
             players: {},
             namespace: io.of(name),
             game1: new Chess(),
-            game2: new Chess()
+            game2: new Chess(),
+            hands: {
+                board1BlackHand: [],
+                board1WhiteHand: [],
+                board2BlackHand: [],
+                board2WhiteHand: []
+            }
         };
         sessions[name] = gameSession;
         gameSession.namespace.on('connection', function(sock) {
@@ -86,11 +100,11 @@ app.get('/session/:name', function(req, res) {
                     fen = gameSession.game1.fen();
 
                     if(moveData.move.captured){ //If there was a piece captured
-                        if(moveData.move.color === "w"){
-                            sessions[name].players.board2Black.hand.push(moveData.move.captured) // add the piece to the player's partner's hand
+                        if(moveData.move.color === "w"){                           
+                            gameSession.hands.board2BlackHand.push(moveData.move.captured) // add the piece to the player's partner's hand
                         }
-                        else if(moveData.move.color === "b"){
-                            sessions[name].players.board2White.hand.push(moveData.move.captured) // add the piece to the player's partner's hand
+                        else if(moveData.move.color === "b"){                            
+                            gameSession.hands.board2WhiteHand.push(moveData.move.captured);// add the piece to the player's partner's hand
                         }
                     }
 
@@ -99,25 +113,19 @@ app.get('/session/:name', function(req, res) {
                     fen = gameSession.game2.fen();
 
                     if(moveData.move.captured){ //If there was a piece captured
-                        if(moveData.move.color === "w"){
-                            sessions[name].players.board1Black.hand.push(moveData.move.captured)  // add the piece to the player's partner's hand
+                        if(moveData.move.color === "w"){                           
+                            gameSession.hands.board1BlackHand.push(moveData.move.captured)// add the piece to the player's partner's hand
                         }
-                        else if(moveData.move.color === "b"){
-                            sessions[name].players.board1White.hand.push(moveData.move.captured) // add the piece to the player's partner's hand
+                        else if(moveData.move.color === "b"){                           
+                            gameSession.hands.board1WhiteHand.push(moveData.move.captured)// add the piece to the player's partner's hand
                         }
                     }
 
                 } else return;
 
 
-                console.log("Hands: ")
-                console.log("PW1 " + JSON.stringify(sessions[name].players.board1White.hand))
-                console.log("PB1: " + JSON.stringify(sessions[name].players.board1Black.hand))
-                console.log("PW2: " + JSON.stringify(sessions[name].players.board2White.hand))
-                console.log("PB2: " + JSON.stringify(sessions[name].players.board2Black.hand))
-
                 console.log("Sending fen:", fen);
-                sock.broadcast.emit('gameChanged', moveData.board, fen);
+                sock.broadcast.emit('gameChanged', moveData.board, fen, gameSession.hands);
             });
             sock.on('playerNameChanged', function(playerId: keyof Players, name: string, fn: Function) {
                 playerKey = playerId;

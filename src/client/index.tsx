@@ -9,6 +9,13 @@ interface Player {
     name: string
 }
 
+interface Hands{
+    board1WhiteHand?: string[],
+    board1BlackHand?: string[],
+    board2WhiteHand?: string[],
+    board2BlackHand?: string[]
+}
+
 interface Players {
     board1White?: Player,
     board1Black?: Player,
@@ -55,8 +62,8 @@ class App {
             onSnapEnd: this.onSnapEnd,
             orientation: 'black'
         }
-        const board1El = document.getElementById('board1');
-        const board2El = document.getElementById('board2');
+        const board1El = document.getElementById('board1')!;
+        const board2El = document.getElementById('board2')!;
         this.board1 = ChessBoard(board1El, board1Config);
         this.board2 = ChessBoard(board2El, board2Config);
         this.game1 = {
@@ -71,7 +78,7 @@ class App {
         const playerNameInputs = document.getElementsByName('player-name');
         for (var i = 0; i < playerNameInputs.length; i++) {
             let input = playerNameInputs[i];
-            (this.playerInputs as any)[input.id] = input;
+            (this.playerInputs as any)[input.dataset.position!] = input;
             input.addEventListener('change', this.onPlayerNameChange);
         }
     }
@@ -84,6 +91,9 @@ class App {
         this.board1.position(boards.fen1);
         this.board2.position(boards.fen2);
 
+        this.updateTurnIndicator(this.game1.boardName, this.game1.state.turn());
+        this.updateTurnIndicator(this.game2.boardName, this.game2.state.turn());
+        
         if (players.board1White)
                 this.playerInputs.board1White.value = players.board1White.name;
         if (players.board1Black)
@@ -96,7 +106,7 @@ class App {
 
     onPlayerNameChange = (e: Event) => {
         const input = e.target as HTMLInputElement;
-        const id = input.id;
+        const id = input.dataset.position;
         const newPlayerName = input.value;
         this.sock.emit('playerNameChanged', id, newPlayerName, this.nameChangeConfirmed);
     }
@@ -132,14 +142,16 @@ class App {
         }
     }
 
-    gameChanged = (boardname: string, fen: string) => {
+    gameChanged = (boardname: string, fen: string, hands: Hands) => {
         console.log("Game changed on board", boardname);
         if (boardname === "1") {
             this.game1.state.load(fen);
             this.board1.position(fen);
+            this.updateTurnIndicator(boardname, this.game1.state.turn());
         } else if (boardname === "2") {
             this.game2.state.load(fen);
             this.board2.position(fen);
+            this.updateTurnIndicator(boardname, this.game2.state.turn());
         }
     }
 
@@ -174,12 +186,15 @@ class App {
         oldPos: object,
         orientation: string) => {
 
-        const gameEngine = (this.me.boardName === "1") ? this.game1.state : this.game2.state;
+        const boardName = this.me.boardName;
+        const gameEngine = (boardName === "1") ? this.game1.state : this.game2.state;
         const move = gameEngine.move({
             from: source,
             to: target,
             promotion: 'q' // TODO: allow user to pick promotion piece
         });
+
+        this.updateTurnIndicator(boardName, gameEngine.turn());
 
         // illegal move
         if (!move) return 'snapback';
@@ -189,6 +204,17 @@ class App {
             board: this.me.boardName,
             move: move
         });
+    }
+
+    updateTurnIndicator(boardName: string, turn: string) {
+        if (turn === "w") {
+            // You asked for this
+            $(`#board${boardName}White .player-turn`).addClass("active");
+            $(`#board${boardName}Black .player-turn`).removeClass("active");
+        } else {
+            $(`#board${boardName}Black .player-turn`).addClass("active");
+            $(`#board${boardName}White .player-turn`).removeClass("active");
+        }
     }
 
     // update the board position after the piece snap
@@ -201,8 +227,12 @@ class App {
     }
 }
 
+declare interface Window {
+    app?: App;
+}
+
 function initSession(name: string) {
     console.log("Creating new session: " + name);
     const elem = document.getElementById('root')!;
-    const app = new App(elem, name);
+    window.app = new App(elem, name);
 }
