@@ -1,4 +1,3 @@
-
 interface State {
     count: number;
     data: string;
@@ -9,7 +8,7 @@ interface Player {
     name: string
 }
 
-interface Hands{
+interface Hands {
     board1WhiteHand?: string[],
     board1BlackHand?: string[],
     board2WhiteHand?: string[],
@@ -17,10 +16,10 @@ interface Hands{
 }
 
 interface Players {
-    board1White?: Player,
-    board1Black?: Player,
-    board2White?: Player,
-    board2Black?: Player
+    board1w?: Player,
+    board1b?: Player,
+    board2w?: Player,
+    board2b?: Player
 }
 
 
@@ -33,10 +32,10 @@ class App {
     board1: ChessBoardInstance;
     board2: ChessBoardInstance;
     playerInputs: {
-        board1White: HTMLInputElement,
-        board1Black: HTMLInputElement,
-        board2White: HTMLInputElement,
-        board2Black: HTMLInputElement
+        board1w: HTMLInputElement,
+        board1b: HTMLInputElement,
+        board2w: HTMLInputElement,
+        board2b: HTMLInputElement
     };
     game1: {boardName: string, state: Chess};
     game2: {boardName: string, state: Chess};
@@ -74,18 +73,17 @@ class App {
             state: new Chess(),
             boardName: "2"
         };
+
         this.playerInputs = {} as any;
         const playerNameInputs = document.getElementsByName('player-name');
         for (var i = 0; i < playerNameInputs.length; i++) {
-            let input = playerNameInputs[i];
+            const input = playerNameInputs[i];
             (this.playerInputs as any)[input.dataset.position!] = input;
             input.addEventListener('change', this.onPlayerNameChange);
         }
     }
 
     initGame = (boards: {fen1: string , fen2: string}, players: Players) => {
-        console.log("fen1: " + boards.fen1);
-        console.log("fen2: " + boards.fen2);
         this.game1.state.load(boards.fen1);
         this.game2.state.load(boards.fen2);
         this.board1.position(boards.fen1);
@@ -93,15 +91,17 @@ class App {
 
         this.updateTurnIndicator(this.game1.boardName, this.game1.state.turn());
         this.updateTurnIndicator(this.game2.boardName, this.game2.state.turn());
-        
-        if (players.board1White)
-                this.playerInputs.board1White.value = players.board1White.name;
-        if (players.board1Black)
-                this.playerInputs.board1Black.value = players.board1Black.name;
-        if (players.board2White)
-                this.playerInputs.board2White.value = players.board2White.name;
-        if (players.board2Black)
-                this.playerInputs.board2Black.value = players.board2Black.name;
+
+        if (players.board1w)
+                this.playerInputs.board1w.value = players.board1w.name;
+        if (players.board1b)
+                this.playerInputs.board1b.value = players.board1b.name;
+        if (players.board2w)
+                this.playerInputs.board2w.value = players.board2w.name;
+        if (players.board2b)
+                this.playerInputs.board2b.value = players.board2b.name;
+
+        this.updateEndingModal();
     }
 
     onPlayerNameChange = (e: Event) => {
@@ -114,16 +114,16 @@ class App {
     nameChangeConfirmed = (playerId: string) => {
         // Set player's board position
         switch (playerId) {
-            case "board1White":
+            case "board1w":
                 this.me = {boardName: "1", color: "w"};
                 break;
-            case "board1Black":
+            case "board1b":
                 this.me = {boardName: "1", color: "b"};
                 break;
-            case "board2White":
+            case "board2w":
                 this.me = {boardName: "2", color: "w"};
                 break;
-            case "board2Black":
+            case "board2b":
                 this.me = {boardName: "2", color: "b"};
                 break;
         }
@@ -149,18 +149,15 @@ class App {
             this.board1.position(fen);
             this.updateTurnIndicator(boardname, this.game1.state.turn());
             if (this.game1.state.in_checkmate()) {
-                const turn = this.game1.state.turn() === "w"
-                    ? "White"
-                    : "Black";
-                const playerName = `#board1${turn}`;
-                
+                const playerName = `#board1${this.game1.state.turn()}`;
+
             }
         } else if (boardname === "2") {
             this.game2.state.load(fen);
             this.board2.position(fen);
             this.updateTurnIndicator(boardname, this.game2.state.turn());
-            if 
         }
+        this.updateEndingModal();
     }
 
     // do not pick up pieces if the game is over
@@ -203,6 +200,7 @@ class App {
         });
 
         this.updateTurnIndicator(boardName, gameEngine.turn());
+        this.updateEndingModal();
 
         // illegal move
         if (!move) return 'snapback';
@@ -217,11 +215,29 @@ class App {
     updateTurnIndicator(boardName: string, turn: string) {
         if (turn === "w") {
             // You asked for this
-            $(`#board${boardName}White .player-turn`).addClass("active");
-            $(`#board${boardName}Black .player-turn`).removeClass("active");
+            $(`#board${boardName}w .player-turn`).addClass("active");
+            $(`#board${boardName}b .player-turn`).removeClass("active");
         } else {
-            $(`#board${boardName}Black .player-turn`).addClass("active");
-            $(`#board${boardName}White .player-turn`).removeClass("active");
+            $(`#board${boardName}b .player-turn`).addClass("active");
+            $(`#board${boardName}w .player-turn`).removeClass("active");
+        }
+    }
+
+    updateEndingModal() {
+        if (this.game1.state.in_checkmate()) {
+            const $modal = $("#board1").siblings(".modal");
+            $modal.addClass("active");
+            const color = this.game2.state.turn() === "w" ? "b" : "w";
+            const playerKey = "board1" + color as keyof Players;
+            const playerName = this.playerInputs[playerKey].value || color;
+            $modal.children("h3").text(`${playerName} won!`);
+        } else if (this.game2.state.in_checkmate()) {
+            const $modal = $("#board2").siblings(".modal");
+            $modal.addClass("active");
+            const color = this.game2.state.turn() === "w" ? "b" : "w";
+            const playerKey = "board2" + color as keyof Players;
+            const playerName = this.playerInputs[playerKey].value || color;
+            $modal.children("h3").text(`${playerName} won!`);
         }
     }
 

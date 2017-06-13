@@ -32,7 +32,7 @@ body {
 #main-navbar {
     position: relative;
     min-height: 1px;
-    
+
 }
 
 .container{
@@ -48,7 +48,7 @@ header {
 }
 
 h2 {
-    padding-right: 4%;  
+    padding-right: 4%;
     text-align: right;
     color: var(--color-te2);
 }
@@ -58,7 +58,7 @@ h2 {
     font-size: 80px;
     font-weight: bold;
     color: var(--color-te2);
-    width: 50%;  
+    width: 50%;
     margin: 0%;
     min-width: 320px;
 }
@@ -79,7 +79,7 @@ a:link    {
       /* this applies to any unvisited links */
       text-decoration:  none;
       font-weight:      bold;
-}     
+}
 a:hover {
     color: var(--color-te1);
 }
@@ -121,16 +121,16 @@ ul {
     margin: 0;
     padding: 0;
 }
- 
+
 li {
     font-size: 20px;
     border-bottom: 1px solid var(--color-two)
 }
- 
+
 li:last-child {
     border: none;
 }
- 
+
 li a {
     text-decoration: none;
     display: block;
@@ -140,7 +140,7 @@ li a {
     -webkit-transition: font-size 0.15s ease, background-color 0.15s ease;
     transition: font-size 0.15s ease, background-color 0.15s ease;
 }
- 
+
 li a:hover {
     font-size: 22px;
     background: var(--color-ba5);
@@ -201,7 +201,7 @@ li a:hover {
 }
 
 .modal {
-    display: flex;
+    display: none;
     position: absolute;
     background-color: rgba(0, 0, 0, .8);
     left: 0;
@@ -213,7 +213,7 @@ li a:hover {
 }
 
 .modal.active {
-    display: block;
+    display: flex;
 }
 
 .modal h3 {
