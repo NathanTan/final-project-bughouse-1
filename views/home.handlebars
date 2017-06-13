@@ -24,12 +24,11 @@
     <div class="col-md-6">
         {{#if sessions}}
             <h3>Join a current game: </h3>
-            <input type="text" class="form-control" name="sessionFilterInput" placeholder="Search for a session..." required>
+            <input type="text" class="form-control" id="session-filter-input" placeholder="Search for a session..." required>
             <ul>
                 {{#each sessions }}
-                    <li>
-
-                        <a href="/session/{{name}}">
+                    <li class = "session-names">
+                        <a href="/session/{{name}}" class = "name">
                             {{ name }} (0/4)
                         </a>
                     </li>
@@ -40,3 +39,5 @@
         {{/if}}
     </div>
 </div>
+
+<script src="/js/client/search.js"></script>
