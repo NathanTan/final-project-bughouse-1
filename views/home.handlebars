@@ -1,31 +1,42 @@
-<h1>Bughouse!</h1>
+{{> header}}
+
+
+
+<div class= "slogan">
+    <h2> Win the war! </h2>
+</div>
+
 <div class="row">
-	<div class="col-md-6">
-		<h2>Join a current game</h2>
-		<ul>
-			{{#each sessions }}
-				<li>
-					<a href="/session/{{name}}">
-						{{ name }}
-					</a>
-				</li>
-			{{else}}
-				<p>No games created</p>
-			{{/each}}
-		</ul>
-	</div>
-	<div class="col-md-6">
-		<h2>Start a new game</h2>
-		<form class="form-inline" action="/session" method="POST">
-			<div class="form-group">
-				<label class="sr-only" for="newSessionName">Session Name</label>
-				<div class="input-group">
-					<input type="text" class="form-control" name="newSessionName" placeholder="Session name" required>
-					<span class="input-group-btn">
-						<button type="submit" class="btn btn-primary">Start</button>
-					</span>
-				</div>
-			</div>
-		</form>
-	</div>
+    <div class="col-md-6">
+        <h3>Start a new game! </h3>
+        <form class="form-inline" action="/session" method="POST">
+            <div class="form-group">
+                <label class="sr-only" for="newSessionName">Session Name</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" name="newSessionName" placeholder="Session name" required>
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">Start</button>
+                    </span>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        {{#if sessions}}
+            <h3>Join a current game: </h3>
+            <input type="text" class="form-control" name="sessionFilterInput" placeholder="Search for a session..." required>
+            <ul>
+                {{#each sessions }}
+                    <li>
+
+                        <a href="/session/{{name}}">
+                            {{ name }} (0/4)
+                        </a>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <h3 id="no-games-yet">No games created yet, start a new one! </h3>
+        {{/if}}
+    </div>
 </div>
