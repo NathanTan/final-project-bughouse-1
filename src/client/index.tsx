@@ -85,7 +85,7 @@ class App {
             input.addEventListener('change', this.onPlayerNameChange);
         }
 
-        document.addEventListener('click', this.addClassesToSparePiece);
+        this.addClassesToSparePiece();
     }
 
     initGame = (boards: {fen1: string , fen2: string}, players: Players) => {
