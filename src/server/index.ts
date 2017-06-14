@@ -167,7 +167,7 @@ app.post('/session', function(req, res) {
 });
 
 app.get('*', function(req, res) {
-    res.render('404page', { sessions });
+    res.render('404page');
 });
 
 
