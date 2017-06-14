@@ -166,5 +166,10 @@ app.post('/session', function(req, res) {
     if (newSessionName)	res.redirect('/session/' + newSessionName);
 });
 
+app.get('*', function(req, res) {
+    res.render('404page', { sessions });
+});
+
+
 const port = process.env.PORT || 3000;
 server.listen(port);
