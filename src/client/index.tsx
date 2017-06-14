@@ -215,11 +215,11 @@ class App {
     updateTurnIndicator(boardName: string, turn: string) {
         if (turn === "w") {
             // You asked for this
-            $(`#board${boardName}w .player-turn`).addClass("active");
-            $(`#board${boardName}b .player-turn`).removeClass("active");
+            $(`#board${boardName}w .player-name`).addClass("active");
+            $(`#board${boardName}b .player-name`).removeClass("active");
         } else {
-            $(`#board${boardName}b .player-turn`).addClass("active");
-            $(`#board${boardName}w .player-turn`).removeClass("active");
+            $(`#board${boardName}b .player-name`).addClass("active");
+            $(`#board${boardName}w .player-name`).removeClass("active");
         }
     }
 
