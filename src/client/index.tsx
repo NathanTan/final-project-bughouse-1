@@ -11,7 +11,7 @@ interface Player {
 interface Hands {
     board1WhiteHand?: string[],
     board1BlackHand?: string[],
-    board2WhiteHand?: string[],
+    board2WhiteHand?: string[], 
     board2BlackHand?: string[]
 }
 
@@ -51,7 +51,8 @@ class App {
             draggable: true,
             onDrop: this.onDrop.bind(this),
             onDragStart: this.onDragStart.bind(this),
-            onSnapEnd: this.onSnapEnd.bind(this)
+            onSnapEnd: this.onSnapEnd.bind(this),
+            sparePieces: true
         }
         const board2Config: ChessBoardJS.BoardConfig = {
             showNotation: false,
@@ -59,8 +60,10 @@ class App {
             onDrop: this.onDrop,
             onDragStart: this.onDragStart,
             onSnapEnd: this.onSnapEnd,
-            orientation: 'black'
+            orientation: 'black',
+            sparePieces: true
         }
+        
         const board1El = document.getElementById('board1')!;
         const board2El = document.getElementById('board2')!;
         this.board1 = ChessBoard(board1El, board1Config);
@@ -81,6 +84,8 @@ class App {
             (this.playerInputs as any)[input.dataset.position!] = input;
             input.addEventListener('change', this.onPlayerNameChange);
         }
+
+        document.addEventListener('click', this.addClassesToSparePiece);
     }
 
     initGame = (boards: {fen1: string , fen2: string}, players: Players) => {
@@ -248,6 +253,41 @@ class App {
             this.board1.position(this.game1.state.fen());
         else
             this.board2.position(this.game2.state.fen());
+    }
+
+    addClassesToSparePiece = () => {
+        let index = 0;
+        //The order of all of the are b w w b
+        let sparePieces = $(".spare-pieces-7492f").children().toArray();        
+        for(let j = 0; j < 4; j ++){
+            for(let i = 0; i < 6; i++){            
+            switch(i){
+                    case 0: sparePieces[index].className += (" k");                    
+                                            break;
+                    case 1: sparePieces[index].className += (" q");                    
+                                            break;
+                    case 2: sparePieces[index].className += (" r");                    
+                                            break;
+                    case 3: sparePieces[index].className += (" b");                    
+                                            break;
+                    case 4: sparePieces[index].className += (" n");                    
+                                            break;
+                    case 5: sparePieces[index].className += (" p");                    
+                                            break;
+                }
+
+                if (j === 1 || j === 4) {
+                    sparePieces[index].className += (" black");
+                }
+                else if (j === 2 || j === 3) {
+                    sparePieces[index].className += (" white");
+                }
+
+                sparePieces[index].className += (" hidden"); //Hide them all
+                index++;
+
+            }
+        }
     }
 }
 
