@@ -37,6 +37,7 @@ class App {
         board2w: HTMLInputElement,
         board2b: HTMLInputElement
     };
+    hands: Hands;
     game1: {boardName: string, state: Chess};
     game2: {boardName: string, state: Chess};
 
@@ -76,6 +77,14 @@ class App {
             state: new Chess(),
             boardName: "2"
         };
+
+        let hands: Hands = {
+            board1BlackHand: [],
+            board1WhiteHand: [],
+            board2BlackHand: [],
+            board2WhiteHand: []
+        }
+        this.hands = hands;
 
         this.playerInputs = {} as any;
         const playerNameInputs = document.getElementsByName('player-name');
@@ -163,6 +172,8 @@ class App {
             this.updateTurnIndicator(boardname, this.game2.state.turn());
         }
         this.updateEndingModal();
+        this.hands = hands;
+        this.updateHands();
     }
 
     // do not pick up pieces if the game is over
@@ -257,7 +268,7 @@ class App {
 
     addClassesToSparePiece = () => {
         let index = 0;
-        //The order of all of the are b w w b
+        //The order of all of the groups of spare pieces are b w w b
         let sparePieces = $(".spare-pieces-7492f").children().toArray();        
         for(let j = 0; j < 4; j ++){
             for(let i = 0; i < 6; i++){            
@@ -288,6 +299,70 @@ class App {
 
             }
         }
+    }
+
+    updateHands = () => {
+        let sparePieces = $(".spare-pieces-7492f").children().toArray();       
+        
+        this.hands.board1BlackHand!.forEach((element) =>  {
+            switch (element) { //Never the king
+                case 'q': sparePieces[1].classList.remove('hidden');
+                break;
+                case 'r': sparePieces[2].classList.remove('hidden');
+                break;
+                case 'b': sparePieces[3].classList.remove('hidden');
+                break;
+                case 'n': sparePieces[4].classList.remove('hidden');
+                break;
+                case 'p': sparePieces[5].classList.remove('hidden'); 
+                break;               
+            }
+        });
+
+        this.hands.board1WhiteHand!.forEach((element) => {
+            switch (element) {
+                case 'q': sparePieces[7].classList.remove('hidden');
+                break;
+                case 'r': sparePieces[8].classList.remove('hidden');
+                break;
+                case 'b': sparePieces[9].classList.remove('hidden');
+                break;
+                case 'n': sparePieces[10].classList.remove('hidden');
+                break;
+                case 'p': sparePieces[11].classList.remove('hidden');
+                break;                
+            }
+        });
+
+        this.hands.board2WhiteHand!.forEach((element) => {
+            switch (element) {
+                case 'q': sparePieces[13].classList.remove('hidden');
+                break;
+                case 'r': sparePieces[14].classList.remove('hidden');
+                break;
+                case 'b': sparePieces[15].classList.remove('hidden');
+                break;
+                case 'n': sparePieces[16].classList.remove('hidden');
+                break;
+                case 'p': sparePieces[17].classList.remove('hidden'); 
+                break;           
+            }
+        });
+
+        this.hands.board2BlackHand!.forEach((element) => {
+            switch (element) {
+                case 'q': sparePieces[19].classList.remove('hidden');
+                break;
+                case 'r': sparePieces[20].classList.remove('hidden');
+                break;
+                case 'b': sparePieces[21].classList.remove('hidden');
+                break;
+                case 'n': sparePieces[22].classList.remove('hidden');
+                break;
+                case 'p': sparePieces[23].classList.remove('hidden');  
+                break;              
+            }
+        });             
     }
 }
 
