@@ -46,7 +46,7 @@ class App {
         this.sock.on('gameChanged', this.gameChanged);
         this.sock.on('initGame', this.initGame);
         this.sock.on('playerNameChanged', this.playerNameChanged);
-
+        this.sock.on('pieceCaptured', this.pieceCaptured);
         const board1Config: ChessBoardJS.BoardConfig = {
             showNotation: false,
             draggable: true,
@@ -264,6 +264,11 @@ class App {
             this.board1.position(this.game1.state.fen());
         else
             this.board2.position(this.game2.state.fen());
+    }
+
+    pieceCaptured = (hands: Hands) => {
+        this.hands = hands;
+        this.updateHands();
     }
 
     addClassesToSparePiece = () => {

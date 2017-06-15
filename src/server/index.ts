@@ -120,12 +120,12 @@ app.get('/session/:name', function(req, res) {
                             gameSession.hands.board1WhiteHand.push(moveData.move.captured)// add the piece to the player's partner's hand
                         }
                     }
-
                 } else return;
 
 
                 console.log("Sending fen:", fen);
                 sock.broadcast.emit('gameChanged', moveData.board, fen, gameSession.hands);
+                sock.emit('pieceCaptured', gameSession.hands);
             });
             sock.on('playerNameChanged', function(playerId: keyof Players, name: string, fn: Function) {
                 playerKey = playerId;
